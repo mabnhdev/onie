@@ -382,6 +382,12 @@ endif
 ifeq ($(IPMITOOL_ENABLE),yes)
   include make/ipmitool.make
 endif
+ifeq ($(OPENSSL_ENABLE),yes)
+  include make/openssl.make
+endif
+ifeq ($(CLOUDCONNECT_ENABLE),yes)
+  include make/cloudconnect.make
+endif
 include make/images.make
 include make/demo.make
 
