@@ -1,0 +1,30 @@
+========================================
+Installing ONIE on Extreme Networks X690
+========================================
+
+Cross-Compiling ONIE
+====================
+
+Change directories to ``build-config`` to compile ONIE.
+
+To compile ONIE first change directories to ``build-config`` and then
+type ``"make MACHINEROOT=../machine/extremenetworks  MACHINE=extremenetworks_x690 all"``.
+For example::
+
+  $ cd build-config
+  $ make -j4 MACHINEROOT=../machine/extremenetworks  MACHINE=extremenetworks_x690 all
+
+When complete, the ONIE binaries are located in
+``build/images``::
+
+-rw-r--r-- 1 5353548 Aug 13 18:48 extremenetworks_x690-r0.initrd
+-rw-r--r-- 1 3347392 Aug 13 15:58 extremenetworks_x690-r0.vmlinuz
+-rw-r--r-- 1 8715893 Aug 13 18:48 onie-updater-x86_64-extremenetworks_x690-r0
+-rw-r--r-- 1 18874368 Aug 13 19:06 onie-recovery-x86_64-extremenetworks_x690-r0.iso
+
+extremenetworks_x690-r0.vmlinuz -- This is the ONIE kernel image
+
+extremenetworks_x690-r0.initrd  -- This is the ONIE initramfs (filesystem)
+
+onie-updater-x86_64-extremenetworks_x690-r0 -- This is the ONIE self-update
+image.  This image is a self-extracting archive used for installing ONIE.
