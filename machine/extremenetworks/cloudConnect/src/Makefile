@@ -11,11 +11,14 @@ CLOUD_CFLAGS	:= -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
 default: $(TARGET)
 all: default
 
+
+
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 HEADERS = $(wildcard *.h)
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) $(CLOUD_CFLAGS) -c $<
+
 
 .PRECIOUS: $(TARGET) $(OBJECTS)
 
