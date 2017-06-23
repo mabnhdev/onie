@@ -102,7 +102,7 @@ SSL *https_connect(struct EMC_SERVER *server)
         memcpy(&sa.sin_addr, result->h_addr_list[0], 
                result->h_length);
     } else {
-        printf("ERROR: Unknown host: %s\n", server->hostname);
+        debug_printf("      ERROR: Unknown host: %s\n", server->hostname);
         return(NULL);
         
     }
@@ -133,16 +133,18 @@ SSL *https_connect(struct EMC_SERVER *server)
 		printf("AGH! No connection!\n");
 		exit(0);
 	}
-	debug_printf("Connected with %s cipher..\n", SSL_get_cipher(ssl));
+	debug_printf("    Connected to %s:%d with %s cipher..\n",
+				 server->hostname, server->port,
+				 SSL_get_cipher(ssl));
 	
     return(ssl);
 }
 
-int httpsGet(struct EMC_SERVER *server, char *path)
+int httpsGet(struct EMC_SERVER *server, const char *path)
 {
 	return(httpsRequest("GET", server, path, NULL, 0));
 }
-int httpsPut(struct EMC_SERVER *server, char *path,
+int httpsPut(struct EMC_SERVER *server, const char *path,
 			 char *payload, int payloadLen)
 {
 	return(httpsRequest("PUT", server, path, payload, payloadLen));
@@ -153,7 +155,7 @@ int httpsRequest(char *method, struct EMC_SERVER *server,
 {
 	char tmp[8192];
 //	, *buf;
-	int count;
+//	int count;
 	char *setCookieKeyword = "Set-Cookie: ";
 	char *ptr;
 
@@ -163,7 +165,7 @@ int httpsRequest(char *method, struct EMC_SERVER *server,
 
 	// Make sure we init the response code to 0 (indicates no response)
 	server->response.responseCode = 0; // init for no response
-//	debug_printf("HTTP %s %s\n", method, path);
+	debug_printf("HTTP %s %s\n", method, path);
 	
 	// if we're not connected, then connect.
 	if (server->connected != TRUE) {
@@ -217,17 +219,17 @@ int httpsRequest(char *method, struct EMC_SERVER *server,
 		strcat(server->request.buffer, "\r\n");
 	}
 	
-	debug_printf("%s\n", server->request.buffer);
+//	debug_printf("%s\n", server->request.buffer);
 		
-	count = SSL_write(server->ssl_fd, server->request.buffer,
-					  strlen(server->request.buffer));
-	debug_printf("Wrote %d bytes.\n", count);
+	SSL_write(server->ssl_fd, server->request.buffer,
+			  strlen(server->request.buffer));
+//	debug_printf("Wrote %d bytes.\n", count);
 		
-	count = SSL_read(server->ssl_fd,
-					 server->response.buffer, sizeof(server->response.buffer));
-	debug_printf("Read %d bytes.\n", count);
+	SSL_read(server->ssl_fd,
+			 server->response.buffer, sizeof(server->response.buffer));
+//	debug_printf("Read %d bytes.\n", count);
 
-	debug_printf("Discovery Response: %s\n", server->response.buffer);
+//	debug_printf("Discovery Response: %s\n", server->response.buffer);
 
 	// Was a cookie returned?
 	ptr = strstr(server->response.buffer, setCookieKeyword);
@@ -254,7 +256,7 @@ int httpsRequest(char *method, struct EMC_SERVER *server,
 	ptr = strtok(NULL, delims);
 	strncpy(server->response.responseText, ptr, MAX_RESPONSETEXT_LEN);
 	server->response.responseText[MAX_RESPONSETEXT_LEN] = 0;
-	debug_printf("Full Response = %d %s\n",
+	debug_printf("    Full Response = %d %s\n",
 				 server->response.responseCode,
 				 server->response.responseText);
 
@@ -264,12 +266,11 @@ int httpsRequest(char *method, struct EMC_SERVER *server,
 	 * so we can find the encapsulated json.
 	 */
 	char *resp = server->response.buffer;
-	
 	while (1) {
 		ptr = strstr(resp, "\r\n");
 		if (ptr == NULL) break;
 		*ptr=0;
-		debug_printf("Parse Line = (%s)\n", resp);
+//		debug_printf("Parse Line = (%s)\n", resp);
 		if (strlen(resp) == 0) {
 			resp = ptr + 2;
 			strcpy(server->response.payload, resp);

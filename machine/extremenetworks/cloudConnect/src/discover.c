@@ -30,16 +30,30 @@
 
 int emcDiscoverServer(struct EMC_SERVER *server) 
 {
-//	strcpy(server->hostname, "psimonea-pc2.corp.extremenetworks.com");
-	strcpy(server->hostname, "asmola-pc.corp.extremenetworks.com");
-	server->port = 8443;
+	/*
+	 * This is a list of servers we will try to contact to
+	 * find the EMC server. Start with the most generic and end
+	 * with a developers or backup system.
+	 */
+	const char *serverList[] = { "extremecontrol.extremenetworks.com",
+								 "extremecontrol",
+//						   "psimonea-pc2.corp.extremenetworks.com",
+								 "asmola-pc.corp.extremenetworks.com"
+	};
+	int serverCount = (int)(sizeof(serverList)/sizeof(char *));
+	int i;
 
-	if (emcValidateServer(server) != TRUE) {
-		server->valid = 0;
-		return(FALSE);
+	for (i=0; i<serverCount; i++) {
+		const char *name = serverList[i];
+		debug_printf("    Trying to contact: %s...\n", name);
+		strcpy(server->hostname, name);
+		server->port = 8443;
+		if (emcValidateServer(server) != TRUE) continue;
+		server->valid = 1;
+		return(TRUE);
 	}
 	server->valid = 0;
-	return(TRUE);
+	return(FALSE);
 }
 
 int emcValidateServer(struct EMC_SERVER *server)
@@ -49,13 +63,18 @@ int emcValidateServer(struct EMC_SERVER *server)
 	// Make sure we can connect.
 	server->connected = FALSE; // init
 	server->ssl_fd = https_connect(server);
-	if (server->ssl_fd == NULL) return(FALSE);
+	if (server->ssl_fd == NULL) {
+		debug_printf("      Unable to connect to server.\n");
+		return(FALSE);
+	}
+	
 	server->connected = TRUE;
 	
 	// Make sure we get an HTTP 200 from a GET
 	httpsGet(server, "/Clients/device/v1/discovery");
 	if (server->response.responseCode == 200) return(TRUE);
-
+	debug_printf("      Invalid response code: %d\n",
+				 server->response.responseCode);
 	return(FALSE);
 }
 
