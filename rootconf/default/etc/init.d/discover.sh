@@ -13,7 +13,7 @@ PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
 import_cmdline
 
-daemon="discover"
+daemon="cloudConnect"
 
 do_start() {
 

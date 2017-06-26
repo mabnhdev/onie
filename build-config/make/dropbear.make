@@ -17,13 +17,16 @@ DROPBEAR_BUILD_DIR		= $(MBUILDDIR)/dropbear
 DROPBEAR_DIR			= $(DROPBEAR_BUILD_DIR)/dropbear-$(DROPBEAR_VERSION)
 DROPBEAR_CONFIG_H		= conf/dropbear.config.h
 
+DROPBEAR_SRCPATCHDIR		= $(PATCHDIR)/dropbear
 DROPBEAR_DOWNLOAD_STAMP		= $(DOWNLOADDIR)/dropbear-download
 DROPBEAR_SOURCE_STAMP		= $(STAMPDIR)/dropbear-source
+DROPBEAR_PATCH_STAMP		= $(STAMPDIR)/dropbear-patch
 DROPBEAR_CONFIGURE_STAMP	= $(STAMPDIR)/dropbear-configure
 DROPBEAR_BUILD_STAMP		= $(STAMPDIR)/dropbear-build
 DROPBEAR_INSTALL_STAMP		= $(STAMPDIR)/dropbear-install
 DROPBEAR_STAMP			= $(DROPBEAR_SOURCE_STAMP) \
 				  $(DROPBEAR_CONFIGURE_STAMP) \
+				  $(DROPBEAR_PATCH_STAMP) \
 				  $(DROPBEAR_BUILD_STAMP) \
 				  $(DROPBEAR_INSTALL_STAMP)
 
@@ -36,7 +39,7 @@ DROPBEAR_BINS			= usr/sbin/dropbear		\
 				  usr/bin/scp			\
 				  usr/bin/ssh
 
-PHONY += dropbear dropbear-download dropbear-source dropbear-configure \
+PHONY += dropbear dropbear-download dropbear-source dropbear-configure dropbear-patch \
 	dropbear-build dropbear-install dropbear-clean dropbear-download-clean
 
 dropbear: $(DROPBEAR_STAMP)
@@ -57,6 +60,14 @@ $(DROPBEAR_SOURCE_STAMP): $(TREE_STAMP) | $(DROPBEAR_DOWNLOAD_STAMP)
 	$(Q) echo "==== Extracting upstream dropbear ===="
 	$(Q) $(SCRIPTDIR)/extract-package $(DROPBEAR_BUILD_DIR) $(DOWNLOADDIR)/$(DROPBEAR_TARBALL)
 	$(Q) touch $@
+
+dropbear-patch: $(DROPBEAR_PATCH_STAMP)
+$(DROPBEAR_PATCH_STAMP): $(DROPBEAR_SRCPATCHDIR)/* $(DROPBEAR_SOURCE_STAMP)
+	$(Q) rm -f $@ && eval $(PROFILE_STAMP)
+	$(Q) echo "==== Patching dropbear ===="
+	$(Q) $(SCRIPTDIR)/apply-patch-series $(DROPBEAR_SRCPATCHDIR)/series $(DROPBEAR_DIR)
+	$(Q) touch $@
+
 
 ifndef MAKE_CLEAN
 DROPBEAR_NEW_FILES = $(shell test -d $(DROPBEAR_DIR) && test -f $(DROPBEAR_BUILD_STAMP) && \
@@ -81,7 +92,7 @@ $(DROPBEAR_DIR)/options.h: $(DROPBEAR_CONFIG_H) $(DROPBEAR_CONFIGURE_STAMP)
 	$(Q) cp -v $< $@
 
 dropbear-build: $(DROPBEAR_BUILD_STAMP)
-$(DROPBEAR_BUILD_STAMP): $(DROPBEAR_DIR)/options.h $(DROPBEAR_NEW_FILES)
+$(DROPBEAR_BUILD_STAMP): $(DROPBEAR_DIR)/options.h $(DROPBEAR_PATCHSTAMP) $(DROPBEAR_NEW_FILES)
 	$(Q) rm -f $@ && eval $(PROFILE_STAMP)
 	$(Q) echo "====  Building dropbear-$(DROPBEAR_VERSION) ===="
 	$(Q) PATH='$(CROSSBIN):$(PATH)'	$(MAKE) -C $(DROPBEAR_DIR) \

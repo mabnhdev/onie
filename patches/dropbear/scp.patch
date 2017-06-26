@@ -1,0 +1,19 @@
+--- scp.c.orig	2016-07-21 11:17:09.000000000 -0400
++++ scp.c	2017-06-26 13:54:22.228000000 -0400
+@@ -326,7 +326,7 @@
+ 	addargs(&args, "%s", ssh_program);
+ 
+ 	fflag = tflag = 0;
+-	while ((ch = getopt(argc, argv, "dfl:prtvBCc:i:P:q1246S:o:F:")) != -1)
++	while ((ch = getopt(argc, argv, "ydfl:prtvBCc:i:P:q1246S:o:F:")) != -1)
+ 		switch (ch) {
+ 		/* User-visible flags. */
+ 		case '1':
+@@ -334,6 +334,7 @@
+ 		case '4':
+ 		case '6':
+ 		case 'C':
++		case 'y':
+ 			addargs(&args, "-%c", ch);
+ 			break;
+ 		case 'o':
