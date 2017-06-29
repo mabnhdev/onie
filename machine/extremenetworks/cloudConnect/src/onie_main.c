@@ -52,13 +52,59 @@
 
 #include "onie_connector.h"
 
-// Forwards
-SSL *socks_connect_ssl(char *hostname, int port);
+// Globals that are modified by command line arguments
+char *forceServer = NULL;
+int useConsole=1;
+int retrySleep = 30;
+
+extern char *optarg;
+extern int optind;
+void processArgs(int argc, char **argv) 
+{
+	int ch;
+
+	debug_printf("Processing command line arguments...\n");
+	while ((ch = getopt(argc, argv, "os:r:")) != -1) {
+		switch (ch) {
+		case 'o': // foreground
+			debug_printf("----> Send output to original stdout.\n");
+			useConsole=0;
+			break;
+		case 's': // Use this server
+			forceServer = optarg;
+			debug_printf("----> force a server: (%s)\n", forceServer);
+			break;
+		case 'r': // Use this server
+			retrySleep = atoi(optarg);
+			debug_printf("----> retry sleep time set to %d seconds\n",
+						 retrySleep);
+			break;
+		}
+	}
+	debug_printf("End of processing arguments\n");
+}
+
 
 int main(int argc, char **argv)
 {
 	struct EMC_SERVER server;
 
+	/*
+	 * First step is to process command line arguments. These will define
+	 * how this connector will operate.
+	 */
+	processArgs(argc, argv);
+
+	/*
+	 * Close standard output and error, then open the /dev/console
+	 */
+	if (useConsole) {
+		close(1);
+		close(2);
+		open("/dev/console", O_RDWR); // Becomes stdout
+		open("/dev/console", O_RDWR); // Becomes stderr
+	}
+	
 	/*
 	 * Extract the system eeprom settings and save them to a temporary
 	 * file. We do this because it takes a lot of time to query the

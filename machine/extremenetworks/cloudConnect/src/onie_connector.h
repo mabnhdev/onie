@@ -146,15 +146,20 @@ extern int emcDiscoverServer(struct EMC_SERVER *server);
 extern int emcValidateServer(struct EMC_SERVER *server);
 
 // Functions defined in onie_main.c
+//extern SSL *socks_connect_ssl(char *hostname, int port);
+extern void processArgs(int argc, char **argv) ;
 extern int debug_printf(const char *format, ...);
 
 // Functions defined in https.c
+extern void sigchld_handler(int s);
+extern int socks_get_ipaddr(char *ipaddress, char *device);
+extern SSL_CTX* InitCTX(void);
 extern SSL *https_connect(struct EMC_SERVER *server);
 extern int httpsGet(struct EMC_SERVER *server, const char *path);
 extern int httpsPut(struct EMC_SERVER *server, const char *path,
 					char *payload, int payloadLen);
-extern int httpsRequest(char *method, struct EMC_SERVER *server,
-						char *path, char *payload, int payloadLen);
+extern int httpsRequest(const char *method, struct EMC_SERVER *server,
+						const char *path, char *payload, int payloadLen);
 
 // Functions defined in state_machine.
 extern char *eepromValue(const char *cmd) ;

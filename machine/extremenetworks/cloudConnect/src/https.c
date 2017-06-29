@@ -89,7 +89,6 @@ SSL *https_connect(struct EMC_SERVER *server)
     struct sockaddr_in sa;
     struct hostent *result;
     int fd;
-//	SSL_METHOD *method;
 	SSL *ssl;
 	SSL_CTX *ctx;
 	
@@ -150,13 +149,11 @@ int httpsPut(struct EMC_SERVER *server, const char *path,
 	return(httpsRequest("PUT", server, path, payload, payloadLen));
 }
 
-int httpsRequest(char *method, struct EMC_SERVER *server,
-				 char *path, char *payload, int payloadLen)
+int httpsRequest(const char *method, struct EMC_SERVER *server,
+				 const char *path, char *payload, int payloadLen)
 {
 	char tmp[8192];
-//	, *buf;
-//	int count;
-	char *setCookieKeyword = "Set-Cookie: ";
+	const char *setCookieKeyword = "Set-Cookie: ";
 	char *ptr;
 
 	// Clear out previous requests and responses
@@ -246,7 +243,7 @@ int httpsRequest(char *method, struct EMC_SERVER *server,
 	 * into a temporary buffer so that we can apply string tokenization.
 	 * This will preserve the original response in 'buffer'.
 	 */
-	char *delims = " \n\r";
+	const char *delims = " \n\r";
 	char tmp2[100];
 	strncpy(tmp2, server->response.buffer, sizeof(tmp2)-1);
 	tmp[sizeof(tmp2)-1] = 0; // Make sure to terminate.
